@@ -265,10 +265,17 @@ export function GanttChart({ tasks }: GanttChartProps) {
             <div className="flex-1 flex relative">
               {/* Línea de hoy en el encabezado */}
               {isTodayVisible && (
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
-                  style={{ left: `${todayPosition}%` }}
-                ></div>
+                <>
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
+                    style={{ left: `${todayPosition}%` }}
+                  >
+                    <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full"></div>
+                    <div className="absolute top-2 -left-8 text-xs text-red-500 whitespace-nowrap">
+                      Hoy
+                    </div>
+                  </div>
+                </>
               )}
               {timeUnits.map((unit, index) => (
                 <div
@@ -285,62 +292,53 @@ export function GanttChart({ tasks }: GanttChartProps) {
           </div>
 
           {/* Tareas */}
-          <div className="flex">
-            <div className="w-48 flex-shrink-0"></div>
-            <div className="flex-1 relative">
-              {/* Línea de hoy */}
-              {isTodayVisible && (
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
-                  style={{ left: `${todayPosition}%` }}
-                >
-                  <div className="absolute -top-2 -left-2 w-4 h-4 bg-red-500 rounded-full"></div>
-                  <div className="absolute top-2 -left-8 text-xs text-red-500 whitespace-nowrap">
-                    Hoy
+          <div>
+            {organizedTasks.map((task) => {
+              const isSubtask = !!task.parentId;
+              const position = getTaskPosition(task);
+              
+              return (
+                <div key={task.id} className="flex border-b border-gray-200 hover:bg-gray-50">
+                  <div className="w-48 flex-shrink-0 px-4 py-3 flex items-center">
+                    <span className={`text-sm text-gray-700 ${isSubtask ? 'ml-6 text-gray-600' : ''}`}>
+                      {isSubtask && '└ '}
+                      {task.name}
+                    </span>
+                  </div>
+                  <div className="flex-1 relative">
+                    <div className="flex h-full">
+                      {timeUnits.map((unit, index) => (
+                        <div
+                          key={index}
+                          className={`flex-1 border-l border-gray-200 ${
+                            isWeekend(unit.date) ? 'bg-gray-50' : ''
+                          }`}
+                        ></div>
+                      ))}
+                    </div>
+                    
+                    {/* Línea de hoy dentro de cada fila */}
+                    {isTodayVisible && (
+                      <div
+                        className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
+                        style={{ left: `${todayPosition}%` }}
+                      ></div>
+                    )}
+                    
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-8 rounded flex items-center px-2 text-white text-xs shadow-sm"
+                      style={{
+                        ...position,
+                        backgroundColor: task.color,
+                        opacity: isSubtask ? 0.8 : 1
+                      }}
+                    >
+                      <span className="truncate">{task.name}</span>
+                    </div>
                   </div>
                 </div>
-              )}
-
-              <div>
-                {organizedTasks.map((task) => {
-                  const isSubtask = !!task.parentId;
-                  const position = getTaskPosition(task);
-                  
-                  return (
-                    <div key={task.id} className="flex border-b border-gray-200 hover:bg-gray-50">
-                      <div className="w-48 flex-shrink-0 px-4 py-3 flex items-center absolute left-0">
-                        <span className={`text-sm text-gray-700 ${isSubtask ? 'ml-6 text-gray-600' : ''}`}>
-                          {isSubtask && '└ '}
-                          {task.name}
-                        </span>
-                      </div>
-                      <div className="w-full relative">
-                        <div className="flex h-full">
-                          {timeUnits.map((unit, index) => (
-                            <div
-                              key={index}
-                              className={`flex-1 border-l border-gray-200 ${
-                                isWeekend(unit.date) ? 'bg-gray-50' : ''
-                              }`}
-                            ></div>
-                          ))}
-                        </div>
-                        <div
-                          className="absolute top-1/2 -translate-y-1/2 h-8 rounded flex items-center px-2 text-white text-xs shadow-sm"
-                          style={{
-                            ...position,
-                            backgroundColor: task.color,
-                            opacity: isSubtask ? 0.8 : 1
-                          }}
-                        >
-                          <span className="truncate">{task.name}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+              );
+            })}
           </div>
 
           {tasks.length === 0 && (
